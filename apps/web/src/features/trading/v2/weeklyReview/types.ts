@@ -10,13 +10,14 @@ export type WeeklyKpi = {
   value: string
   comparison: string
   tone: "positive" | "negative" | "neutral" | "purple" | "amber" | "blue"
-  spark: number[] // 0–1 normalized
+  spark: number[]
 }
 
 export type WeeklyInsightItem = {
   id: string
   title: string
   description: string
+  evidence?: string
   impact: ImpactLevel
 }
 
@@ -24,10 +25,14 @@ export type WeeklyMistakeItem = {
   id: string
   title: string
   description: string
+  /** AI / mentor root-cause explanation */
+  rootCause: string
+  recommendation: string
   moneyLostLabel: string
   moneyLost: number | null
   severity: Severity
   count: number
+  days: string[]
   relatedTradeLabels: string[]
 }
 
@@ -35,7 +40,18 @@ export type WeeklyLessonItem = {
   id: string
   title: string
   body: string
-  source: string
+  whyItMatters: string
+  sourceCount: number
+}
+
+export type WeeklyDayBrief = {
+  id: string
+  date: string
+  dayLabel: string
+  pnlLabel: string
+  pnl: number
+  highlights: string[]
+  issues: string[]
 }
 
 export type WeeklyChecklistItem = {
@@ -53,7 +69,7 @@ export type WeeklyPriorityItem = {
 
 export type WeeklyDailyPnl = {
   date: string
-  dayLabel: string // Mon, Tue…
+  dayLabel: string
   pnl: number
 }
 
@@ -63,6 +79,10 @@ export type WeeklySetupStat = {
   winRate: number | null
   wins: number
   losses: number
+  netPnl: number
+  netPnlLabel: string
+  avgRr: number | null
+  avgRrLabel: string
 }
 
 export type WeeklyOutcomeSlice = {
@@ -80,7 +100,7 @@ export type WeeklyTimeBucket = {
 export type WeeklyScore = {
   id: string
   label: string
-  value: number // 0–100
+  value: number
 }
 
 export type WeeklyCoachModel = {
@@ -101,6 +121,8 @@ export type WeeklyFooterStats = {
   worstTradeLabel: string
   worstTradePnl: string
   scores: WeeklyScore[]
+  bestSetup: string
+  worstSetup: string
 }
 
 export type WeeklyReviewModel = {
@@ -115,6 +137,7 @@ export type WeeklyReviewModel = {
   whatWorked: WeeklyInsightItem[]
   mistakes: WeeklyMistakeItem[]
   lessons: WeeklyLessonItem[]
+  dayBriefs: WeeklyDayBrief[]
   continueDoing: WeeklyChecklistItem[]
   stopDoing: WeeklyChecklistItem[]
   focusAreas: WeeklyPriorityItem[]
@@ -125,4 +148,7 @@ export type WeeklyReviewModel = {
   coach: WeeklyCoachModel
   footer: WeeklyFooterStats
   netPnl: number
+  /** Compact digest sent to Harry AI for mentoring synthesis */
+  aiDigest: string
+  insightsSource: "deterministic" | "ai"
 }
