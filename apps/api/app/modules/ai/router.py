@@ -24,6 +24,8 @@ from app.modules.ai.schemas import (
     MessageOut,
     WritingPolishRequest,
     WritingPolishResponse,
+    WeeklyReviewInsightsRequest,
+    WeeklyReviewInsightsResponse,
 )
 from app.modules.ai.imports.router import router as imports_router
 from app.modules.ai.import_engine.inbox.router import router as inbox_router
@@ -48,6 +50,16 @@ async def polish_writing(
 ) -> WritingPolishResponse:
     """Live Writing Copilot — rewrite raw notes into polished journal English."""
     return await service.polish_writing(user.id, body)
+
+
+@router.post("/trading/weekly-review", response_model=WeeklyReviewInsightsResponse)
+async def weekly_review_insights(
+    body: WeeklyReviewInsightsRequest,
+    user: CurrentUserDep,
+    service: AiServiceDep,
+) -> WeeklyReviewInsightsResponse:
+    """Harry AI mentor synthesis for Weekly Review insights (JSON)."""
+    return await service.weekly_review_insights(user.id, body)
 
 
 # —— Conversations / history ——

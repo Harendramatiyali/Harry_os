@@ -21,6 +21,8 @@ import type {
   Conversation,
   ConversationDetail,
   MemoryItem,
+  WeeklyReviewInsightsRequest,
+  WeeklyReviewInsightsResponse,
   WritingPolishRequest,
   WritingPolishResponse,
 } from "@/features/ai/types"
@@ -63,6 +65,14 @@ export const aiApi = {
 
   polishWriting(body: WritingPolishRequest, token: string, signal?: AbortSignal) {
     return apiRequest<WritingPolishResponse>("/ai/writing/polish", {
+      body,
+      accessToken: token,
+      signal,
+    })
+  },
+
+  weeklyReviewInsights(body: WeeklyReviewInsightsRequest, token: string, signal?: AbortSignal) {
+    return apiRequest<WeeklyReviewInsightsResponse>("/ai/trading/weekly-review", {
       body,
       accessToken: token,
       signal,

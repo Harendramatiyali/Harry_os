@@ -204,6 +204,7 @@ export function TradingV2Shell({
   left,
   center,
   right,
+  wide = false,
 }: {
   header: ReactNode
   secondaryTabs: TradingTabItem[]
@@ -213,9 +214,11 @@ export function TradingV2Shell({
   left: ReactNode
   center: ReactNode
   right: ReactNode
+  /** Full-width center (Weekly Review) — hide side columns */
+  wide?: boolean
 }) {
   return (
-    <div className="trading-v2" aria-labelledby="tv2-module-title">
+    <div className="trading-v2" aria-labelledby="tv2-module-title" data-wide={wide || undefined}>
       <a href="#tv2-main" className="tv2-skip">
         Skip to journal workspace
       </a>
@@ -228,23 +231,29 @@ export function TradingV2Shell({
           label="Trading module sections"
         />
       </div>
-      <section className="tv2-stats tv2-stagger" aria-label="Trading statistics">
-        {stats}
-      </section>
-      <div className="tv2-layout">
-        <aside className="tv2-left tv2-anim-in" aria-label="Journal list">
-          {left}
-        </aside>
+      {!wide ? (
+        <section className="tv2-stats tv2-stagger" aria-label="Trading statistics">
+          {stats}
+        </section>
+      ) : null}
+      <div className={wide ? "tv2-layout tv2-layout--wide" : "tv2-layout"}>
+        {!wide ? (
+          <aside className="tv2-left tv2-anim-in" aria-label="Journal list">
+            {left}
+          </aside>
+        ) : null}
         <main id="tv2-main" className="tv2-anim-in" style={{ animationDelay: "60ms" }} tabIndex={-1}>
           {center}
         </main>
-        <aside
-          className="tv2-right space-y-3 tv2-anim-in"
-          style={{ animationDelay: "100ms" }}
-          aria-label="Trade insights"
-        >
-          {right}
-        </aside>
+        {!wide ? (
+          <aside
+            className="tv2-right space-y-3 tv2-anim-in"
+            style={{ animationDelay: "100ms" }}
+            aria-label="Trade insights"
+          >
+            {right}
+          </aside>
+        ) : null}
       </div>
     </div>
   )

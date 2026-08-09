@@ -421,6 +421,10 @@
   padding: 0 var(--tv2-pad) var(--tv2-pad);
 }
 
+.trading-v2 .tv2-layout--wide {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .trading-v2 .tv2-left,
 .trading-v2 .tv2-right {
   position: sticky;

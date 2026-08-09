@@ -61,6 +61,8 @@ from app.modules.ai.schemas import (
     MessageRole as MessageRoleSchema,
     WritingPolishRequest,
     WritingPolishResponse,
+    WeeklyReviewInsightsRequest,
+    WeeklyReviewInsightsResponse,
 )
 
 EXAMPLE_PROMPTS = [
@@ -133,6 +135,40 @@ Good:
 The market opened flat, and I had already identified the key support and resistance levels before the session began. After observing my planned setup, I entered the trade. However, after entering, I realized that my stop loss was much larger than my planned risk. The market eventually produced a false breakdown and hit my stop loss.
 
 Return ONLY the polished journal text. No preamble. No commentary."""
+
+
+WEEKLY_REVIEW_SYSTEM = """You are Harry AI — an experienced trading performance mentor for Harry OS.
+
+You review ONE trading week using ONLY the provided journal digest.
+
+Your job:
+- Identify recurring patterns (do not repeat the same sentence from each day).
+- Merge similar lessons into a few actionable takeaways.
+- Summarize strongest positive habits with evidence.
+- For mistakes: use the occurrence counts and days already listed in the digest (do not invent or change counts). Explain root cause and give a fix.
+- Build short day-by-day briefs (highlights + issues) from the digest.
+- Sound like a hedge-fund coach: direct, specific, human.
+
+NEVER:
+- Invent trades, numbers, setups, P&L, or emotions not in the digest.
+- Assume Breakout or any setup unless the digest says so.
+- Write generic filler ("stay disciplined") without tying to this week's data.
+- If evidence is thin, say "Insufficient evidence in journals" instead of guessing.
+
+Return ONLY valid JSON (no markdown fences) with this shape:
+{
+  "what_worked": [{"title":"","description":"","evidence":"","impact":"high|medium|low"}],
+  "mistakes": [{"title":"","occurrences":1,"days":["Monday"],"impact_label":"—","root_cause":"","recommendation":"","severity":"high|medium|low"}],
+  "lessons": [{"title":"","body":"","why_it_matters":""}],
+  "day_briefs": [{"day":"Monday","date":"YYYY-MM-DD","highlights":[""],"issues":[""]}],
+  "continue_doing": [{"label":""}],
+  "stop_doing": [{"label":""}],
+  "focus_areas": [{"number":1,"title":"","description":"","priority":"high|medium|low"}],
+  "coach": {"summary":"","strengths":[],"weaknesses":[],"advice":"","challenge":""}
+}
+
+Max 5 what_worked, 5 mistakes, 5 lessons, 3 focus_areas.
+"""
 
 
 class AiService:
@@ -233,6 +269,66 @@ class AiService:
             model=result.model,
             unchanged=unchanged,
         )
+
+    async def weekly_review_insights(
+        self, user_id: str, data: WeeklyReviewInsightsRequest
+    ) -> WeeklyReviewInsightsResponse:
+        """Synthesize mentor-style weekly insights from a journal digest (JSON only)."""
+        import json
+        import re
+
+        _ = user_id
+        digest = (data.digest or "").strip()
+        if not digest:
+            return WeeklyReviewInsightsResponse(insights={}, model=None, fallback=True)
+
+        if not self.settings.ai_enabled or not self.settings.llm_api_key:
+            raise NotImplementedAppError(
+                "Weekly review AI requires AI_ENABLED=true and LLM_API_KEY.",
+                details={"writing_polish_ready": False},
+            )
+
+        user_prompt = (
+            f"Week label: {data.week_label or 'Selected week'}\n\n"
+            f"Journal digest (source of truth — do not invent beyond this):\n"
+            f"---\n{digest}\n---\n\n"
+            f"Return only the JSON object."
+        )
+
+        result = await self.llm.complete(
+            ChatCompletionRequest(
+                messages=[
+                    LLMMessage(role="system", content=WEEKLY_REVIEW_SYSTEM),
+                    LLMMessage(role="user", content=user_prompt),
+                ],
+                model=self.settings.llm_model,
+                temperature=0.25,
+                max_tokens=3500,
+            )
+        )
+        raw = (result.content or "").strip()
+        if raw.startswith("```"):
+            raw = raw.strip("`")
+            if "\n" in raw:
+                raw = raw.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+
+        try:
+            insights = json.loads(raw)
+            if not isinstance(insights, dict):
+                raise ValueError("not an object")
+        except Exception:
+            # Try to extract first JSON object
+            m = re.search(r"\{[\s\S]*\}", raw)
+            if not m:
+                return WeeklyReviewInsightsResponse(insights={}, model=result.model, fallback=True)
+            try:
+                insights = json.loads(m.group(0))
+                if not isinstance(insights, dict):
+                    return WeeklyReviewInsightsResponse(insights={}, model=result.model, fallback=True)
+            except Exception:
+                return WeeklyReviewInsightsResponse(insights={}, model=result.model, fallback=True)
+
+        return WeeklyReviewInsightsResponse(insights=insights, model=result.model, fallback=False)
 
     # —— Conversations ——
 

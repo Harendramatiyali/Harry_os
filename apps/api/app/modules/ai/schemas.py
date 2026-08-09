@@ -205,3 +205,16 @@ class WritingPolishResponse(BaseModel):
     polished: str
     model: str | None = None
     unchanged: bool = False
+
+
+class WeeklyReviewInsightsRequest(BaseModel):
+    """Harry AI mentor synthesis for one trading week (from journal digest)."""
+
+    week_label: str = Field(default="", max_length=128)
+    digest: str = Field(default="", max_length=20_000)
+
+
+class WeeklyReviewInsightsResponse(BaseModel):
+    insights: dict
+    model: str | None = None
+    fallback: bool = False

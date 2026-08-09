@@ -1,16 +1,18 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useQueries } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import {
   AlertTriangle,
   Ban,
   BookMarked,
+  CalendarDays,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Download,
   GitCompare,
   Lightbulb,
+  Loader2,
   Pin,
   Sparkles,
   Star,
@@ -32,17 +34,22 @@ import {
   YAxis,
 } from "recharts"
 
+import { aiApi } from "@/features/ai/api"
 import { tradingApi } from "@/features/trading/api"
 import { useAuthStore } from "@/features/auth/store"
 import { useJournalAnalytics, useJournalDays } from "@/features/trading/hooks"
 import { resolveDayPnl } from "@/features/trading/v2/mapJournalToV2"
-import { mapWeeklyReview } from "@/features/trading/v2/weeklyReview/mapWeeklyReview"
+import {
+  applyWeeklyAiInsights,
+  mapWeeklyReview,
+} from "@/features/trading/v2/weeklyReview/mapWeeklyReview"
 import {
   shiftTradingWeek,
   tradingWeekBounds,
 } from "@/features/trading/v2/weeklyReview/weekRange"
 import type {
   WeeklyChecklistItem,
+  WeeklyDayBrief,
   WeeklyInsightItem,
   WeeklyKpi,
   WeeklyLessonItem,
@@ -53,6 +60,44 @@ import type {
 import { cn } from "@/shared/lib/utils"
 import { toIsoDate } from "@/features/trading/v2/dateRange"
 import "@/features/trading/v2/weeklyReview/weeklyReview.css"
+
+/** Keep KPIs / setups / mistake counts from journal math when AI prose is applied. */
+function pickStableStats(base: WeeklyReviewModel): Pick<
+  WeeklyReviewModel,
+  | "kpis"
+  | "grade"
+  | "gradeStars"
+  | "setups"
+  | "dailyPnl"
+  | "outcomes"
+  | "timeBuckets"
+  | "footer"
+  | "netPnl"
+  | "aiDigest"
+  | "empty"
+  | "daysWithJournals"
+  | "weekStart"
+  | "weekEnd"
+  | "weekLabel"
+> {
+  return {
+    kpis: base.kpis,
+    grade: base.grade,
+    gradeStars: base.gradeStars,
+    setups: base.setups,
+    dailyPnl: base.dailyPnl,
+    outcomes: base.outcomes,
+    timeBuckets: base.timeBuckets,
+    footer: base.footer,
+    netPnl: base.netPnl,
+    aiDigest: base.aiDigest,
+    empty: base.empty,
+    daysWithJournals: base.daysWithJournals,
+    weekStart: base.weekStart,
+    weekEnd: base.weekEnd,
+    weekLabel: base.weekLabel,
+  }
+}
 
 function Sparkline({ values, tone }: { values: number[]; tone: WeeklyKpi["tone"] }) {
   const stroke =
@@ -92,7 +137,7 @@ function Sparkline({ values, tone }: { values: number[]; tone: WeeklyKpi["tone"]
 
 function GradeRing({ grade, stars }: { grade: string; stars: number }) {
   return (
-    <div className="wr-kpi wr-kpi--grade" data-tone="amber">
+    <div className="wr-kpi wr-kpi--grade wr-kpi--span2" data-tone="amber">
       <p className="wr-kpi__label">Overall Grade</p>
       <svg className="wr-grade-ring" viewBox="0 0 72 72" aria-hidden>
         <circle cx="36" cy="36" r="28" fill="none" stroke="rgba(245,158,11,0.15)" strokeWidth="6" />
@@ -107,7 +152,15 @@ function GradeRing({ grade, stars }: { grade: string; stars: number }) {
           strokeDasharray={`${Math.min(1, stars / 5) * 176} 176`}
           transform="rotate(-90 36 36)"
         />
-        <text x="36" y="41" textAnchor="middle" className="wr-grade-letter" fill="#f59e0b" fontSize="18" fontWeight="750">
+        <text
+          x="36"
+          y="41"
+          textAnchor="middle"
+          className="wr-grade-letter"
+          fill="#f59e0b"
+          fontSize="18"
+          fontWeight="750"
+        >
           {grade}
         </text>
       </svg>
@@ -132,7 +185,7 @@ function KpiCard({ kpi }: { kpi: WeeklyKpi }) {
             : Star
   return (
     <motion.article
-      className="wr-kpi"
+      className="wr-kpi wr-kpi--span2"
       data-tone={kpi.tone}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
@@ -163,6 +216,7 @@ function InsightList({ items }: { items: WeeklyInsightItem[] }) {
           <div>
             <p className="wr-item__title">{it.title}</p>
             <p className="wr-item__desc">{it.description}</p>
+            {it.evidence ? <p className="wr-item__evidence">{it.evidence}</p> : null}
             <div className="wr-item__meta">
               <span className="wr-badge wr-badge--green">{it.impact} impact</span>
             </div>
@@ -181,33 +235,57 @@ function MistakeList({ items }: { items: WeeklyMistakeItem[] }) {
       {items.map((m) => {
         const open = openId === m.id
         return (
-          <div key={m.id} className="wr-item">
-            <span className="wr-item__icon wr-item__icon--red">
-              <AlertTriangle size={16} />
-            </span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <button
-                type="button"
-                className="wr-item__title"
-                style={{ background: "none", border: 0, color: "inherit", cursor: "pointer", padding: 0 }}
-                onClick={() => setOpenId(open ? null : m.id)}
-              >
-                {m.title}
-              </button>
-              <p className="wr-item__desc">{m.description}</p>
-              <div className="wr-item__meta">
-                <span className="wr-money">{m.moneyLostLabel}</span>
-                <span className={cn("wr-badge", m.severity === "high" ? "wr-badge--red" : "wr-badge--amber")}>
-                  {m.severity}
-                </span>
-                <span className="wr-badge wr-badge--amber">{m.count}×</span>
+          <div key={m.id} className="wr-item wr-item--stack">
+            <div className="wr-item__row">
+              <span className="wr-item__icon wr-item__icon--red">
+                <AlertTriangle size={16} />
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <button
+                  type="button"
+                  className="wr-item__title"
+                  style={{
+                    background: "none",
+                    border: 0,
+                    color: "inherit",
+                    cursor: "pointer",
+                    padding: 0,
+                    textAlign: "left",
+                  }}
+                  onClick={() => setOpenId(open ? null : m.id)}
+                >
+                  {m.title}
+                </button>
+                <div className="wr-item__meta">
+                  <span className="wr-badge wr-badge--amber">Occurred {m.count}×</span>
+                  {m.days.length ? (
+                    <span className="wr-badge wr-badge--amber">Days: {m.days.join(", ")}</span>
+                  ) : null}
+                  <span className="wr-money">Impact {m.moneyLostLabel}</span>
+                  <span
+                    className={cn(
+                      "wr-badge",
+                      m.severity === "high" ? "wr-badge--red" : "wr-badge--amber",
+                    )}
+                  >
+                    {m.severity}
+                  </span>
+                </div>
               </div>
-              {open && m.relatedTradeLabels.length ? (
-                <p className="wr-item__desc" style={{ marginTop: 8 }}>
-                  Related: {m.relatedTradeLabels.join(" · ")}
-                </p>
-              ) : null}
             </div>
+            {open ? (
+              <div className="wr-mistake-detail">
+                <p>
+                  <strong>Root cause:</strong> {m.rootCause || m.description}
+                </p>
+                <p>
+                  <strong>Recommendation:</strong> {m.recommendation}
+                </p>
+                {m.relatedTradeLabels.length ? (
+                  <p className="wr-item__desc">Related: {m.relatedTradeLabels.join(" · ")}</p>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         )
       })}
@@ -218,19 +296,25 @@ function MistakeList({ items }: { items: WeeklyMistakeItem[] }) {
 function LessonList({ items }: { items: WeeklyLessonItem[] }) {
   const [fav, setFav] = useState<Record<string, boolean>>({})
   const [pin, setPin] = useState<Record<string, boolean>>({})
-  if (!items.length) return <p className="wr-item__desc">Add lessons in daily journals to unlock this.</p>
+  if (!items.length)
+    return <p className="wr-item__desc">Add lessons in daily journals to unlock this.</p>
   return (
     <>
-      {items.map((l) => (
+      {items.map((l, idx) => (
         <div key={l.id} className="wr-item">
           <span className="wr-item__icon wr-item__icon--purple">
             <Lightbulb size={16} />
           </span>
           <div style={{ flex: 1 }}>
-            <p className="wr-item__title">{l.title}</p>
+            <p className="wr-item__title">
+              Lesson #{idx + 1}: {l.title}
+            </p>
             <p className="wr-item__desc">{l.body}</p>
+            {l.whyItMatters ? <p className="wr-item__evidence">{l.whyItMatters}</p> : null}
             <div className="wr-item__meta">
-              <span className="wr-badge wr-badge--purple">{l.source}</span>
+              <span className="wr-badge wr-badge--purple">
+                {l.sourceCount > 1 ? `${l.sourceCount}× this week` : "Key takeaway"}
+              </span>
             </div>
             <div className="wr-lesson-actions">
               <button
@@ -259,6 +343,44 @@ function LessonList({ items }: { items: WeeklyLessonItem[] }) {
         </div>
       ))}
     </>
+  )
+}
+
+function DayBriefs({ items }: { items: WeeklyDayBrief[] }) {
+  if (!items.length) return null
+  return (
+    <section className="wr-card">
+      <div className="wr-card__head">
+        <CalendarDays size={16} color="#93c5fd" />
+        <h3>Week by Day</h3>
+      </div>
+      <div className="wr-day-grid">
+        {items.map((d) => (
+          <article key={d.id} className="wr-day-card" data-tone={d.pnl >= 0 ? "pos" : "neg"}>
+            <header>
+              <strong>{d.dayLabel}</strong>
+              <span style={{ color: d.pnl >= 0 ? "#22c55e" : "#f43f5e" }}>{d.pnlLabel}</span>
+            </header>
+            {d.highlights.length ? (
+              <ul>
+                {d.highlights.map((h) => (
+                  <li key={h}>✓ {h}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="wr-item__desc">No highlights logged.</p>
+            )}
+            {d.issues.length ? (
+              <ul className="wr-day-issues">
+                {d.issues.map((h) => (
+                  <li key={h}>✗ {h}</li>
+                ))}
+              </ul>
+            ) : null}
+          </article>
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -291,7 +413,8 @@ function Checklist({
 }
 
 function Priorities({ items }: { items: WeeklyPriorityItem[] }) {
-  if (!items.length) return <p className="wr-item__desc">Focus areas appear after a few journaled sessions.</p>
+  if (!items.length)
+    return <p className="wr-item__desc">Focus areas appear after a few journaled sessions.</p>
   return (
     <>
       {items.map((p) => (
@@ -300,7 +423,12 @@ function Priorities({ items }: { items: WeeklyPriorityItem[] }) {
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
               <p className="wr-item__title">{p.title}</p>
-              <span className={cn("wr-badge", p.priority === "high" ? "wr-badge--blue" : "wr-badge--amber")}>
+              <span
+                className={cn(
+                  "wr-badge",
+                  p.priority === "high" ? "wr-badge--blue" : "wr-badge--amber",
+                )}
+              >
                 {p.priority}
               </span>
             </div>
@@ -319,15 +447,31 @@ function AnalyticsBlock({ model }: { model: WeeklyReviewModel }) {
         <TrendingUp size={16} color="#93c5fd" />
         <h3>Weekly Performance Analytics</h3>
       </div>
+      <p className="wr-item__desc" style={{ marginBottom: 12 }}>
+        Setup stats use labels resolved from each trade&apos;s journal text (setup section / notes).
+        Generic default &quot;Breakout&quot; without evidence is treated as Unspecified.
+        Best setup by P&amp;L: <strong>{model.footer.bestSetup}</strong>
+        {" · "}
+        Worst: <strong>{model.footer.worstSetup}</strong>
+      </p>
       <div className="wr-analytics">
         <div className="wr-chart-box">
           <p className="wr-chart-title">Daily P&L</p>
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={model.dailyPnl}>
-              <XAxis dataKey="dayLabel" tick={{ fill: "#8b929e", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <XAxis
+                dataKey="dayLabel"
+                tick={{ fill: "#8b929e", fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+              />
               <YAxis hide />
               <Tooltip
-                contentStyle={{ background: "#161a21", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10 }}
+                contentStyle={{
+                  background: "#161a21",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: 10,
+                }}
                 formatter={(v) => [`₹${Number(v).toLocaleString("en-IN")}`, "P&L"]}
               />
               <Bar dataKey="pnl" radius={[6, 6, 0, 0]}>
@@ -343,19 +487,34 @@ function AnalyticsBlock({ model }: { model: WeeklyReviewModel }) {
           <p className="wr-chart-title">Trade Outcome</p>
           <ResponsiveContainer width="100%" height={140}>
             <PieChart>
-              <Pie data={model.outcomes} dataKey="value" nameKey="name" innerRadius={36} outerRadius={56} paddingAngle={3}>
+              <Pie
+                data={model.outcomes}
+                dataKey="value"
+                nameKey="name"
+                innerRadius={36}
+                outerRadius={56}
+                paddingAngle={3}
+              >
                 {model.outcomes.map((o) => (
                   <Cell key={o.name} fill={o.color} />
                 ))}
               </Pie>
               <Tooltip
-                contentStyle={{ background: "#161a21", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10 }}
+                contentStyle={{
+                  background: "#161a21",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: 10,
+                }}
               />
             </PieChart>
           </ResponsiveContainer>
           <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
             {model.outcomes.map((o) => (
-              <span key={o.name} className="wr-badge wr-badge--amber" style={{ borderLeft: `3px solid ${o.color}` }}>
+              <span
+                key={o.name}
+                className="wr-badge wr-badge--amber"
+                style={{ borderLeft: `3px solid ${o.color}` }}
+              >
                 {o.name} {o.value}
               </span>
             ))}
@@ -363,26 +522,37 @@ function AnalyticsBlock({ model }: { model: WeeklyReviewModel }) {
         </div>
 
         <div className="wr-chart-box">
-          <p className="wr-chart-title">Setup Performance</p>
+          <p className="wr-chart-title">Setup Performance (by net P&L)</p>
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={model.setups} layout="vertical" margin={{ left: 8 }}>
               <XAxis type="number" hide />
               <YAxis
                 type="category"
                 dataKey="setup"
-                width={72}
+                width={96}
                 tick={{ fill: "#8b929e", fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
               />
               <Tooltip
-                contentStyle={{ background: "#161a21", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10 }}
+                contentStyle={{
+                  background: "#161a21",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: 10,
+                }}
                 formatter={(v, _n, item) => {
-                  const wr = (item?.payload as { winRate: number | null })?.winRate
-                  return [`${v} trades${wr != null ? ` · ${wr}% WR` : ""}`, "Count"]
+                  const p = item?.payload as WeeklyReviewModel["setups"][0] | undefined
+                  return [
+                    `${p?.netPnlLabel ?? v} · ${p?.count ?? 0} trades · WR ${p?.winRate ?? "—"}% · RR ${p?.avgRrLabel ?? "—"}`,
+                    "Net P&L",
+                  ]
                 }}
               />
-              <Bar dataKey="count" fill="#a855f7" radius={[0, 6, 6, 0]} />
+              <Bar dataKey="netPnl" radius={[0, 6, 6, 0]}>
+                {model.setups.map((s) => (
+                  <Cell key={s.setup} fill={s.netPnl >= 0 ? "#a855f7" : "#f43f5e"} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -391,10 +561,19 @@ function AnalyticsBlock({ model }: { model: WeeklyReviewModel }) {
           <p className="wr-chart-title">Time Analysis</p>
           <ResponsiveContainer width="100%" height={140}>
             <AreaChart data={model.timeBuckets}>
-              <XAxis dataKey="label" tick={{ fill: "#8b929e", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <XAxis
+                dataKey="label"
+                tick={{ fill: "#8b929e", fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+              />
               <YAxis hide />
               <Tooltip
-                contentStyle={{ background: "#161a21", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10 }}
+                contentStyle={{
+                  background: "#161a21",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: 10,
+                }}
               />
               <Area type="monotone" dataKey="pnl" stroke="#3b82f6" fill="rgba(59,130,246,0.2)" />
             </AreaChart>
@@ -453,6 +632,8 @@ export function WeeklyReviewDashboard() {
   const week = useMemo(() => tradingWeekBounds(anchor), [anchor])
   const prevAnchor = shiftTradingWeek(anchor, -1)
   const prevWeek = useMemo(() => tradingWeekBounds(prevAnchor), [prevAnchor])
+  const [aiModel, setAiModel] = useState<WeeklyReviewModel | null>(null)
+  const [aiStatus, setAiStatus] = useState<"idle" | "loading" | "ready" | "error">("idle")
 
   const journalsQuery = useJournalDays(
     { date_from: week.startDate, date_to: week.endDate },
@@ -477,12 +658,26 @@ export function WeeklyReviewDashboard() {
     })),
   })
 
-  const days = useMemo(
-    () => detailQueries.map((q) => q.data).filter(Boolean) as NonNullable<(typeof detailQueries)[0]["data"]>[],
-    [detailQueries],
-  )
+  // Stable fingerprint — useQueries returns a new array every render; without this,
+  // the AI effect re-fires endlessly and counts flicker.
+  const detailsFingerprint = detailQueries
+    .map((q) => `${q.dataUpdatedAt}:${q.data?.id ?? ""}:${q.data?.trades?.length ?? 0}`)
+    .join("|")
+  const detailsLoading =
+    summaries.length > 0 && detailQueries.some((q) => (q.isLoading || q.isFetching) && !q.data)
+  const allDetailsReady =
+    summaries.length === 0 ||
+    (summaries.length > 0 &&
+      detailQueries.length === summaries.length &&
+      detailQueries.every((q) => Boolean(q.data) || q.isError))
 
-  const detailsLoading = summaries.length > 0 && detailQueries.some((q) => q.isLoading && !q.data)
+  const days = useMemo(() => {
+    if (!allDetailsReady) return []
+    return detailQueries
+      .map((q) => q.data)
+      .filter(Boolean) as NonNullable<(typeof detailQueries)[0]["data"]>[]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fingerprint gates stability
+  }, [allDetailsReady, detailsFingerprint, week.startDate])
 
   const previousSnap = useMemo(() => {
     const items = prevJournalsQuery.data ?? []
@@ -492,7 +687,7 @@ export function WeeklyReviewDashboard() {
     return { netPnl, trades, winRate: null as number | null }
   }, [prevJournalsQuery.data])
 
-  const model = useMemo(
+  const baseModel = useMemo(
     () =>
       mapWeeklyReview({
         weekStart: week.startDate,
@@ -505,22 +700,113 @@ export function WeeklyReviewDashboard() {
     [week, days, analyticsQuery.data, previousSnap],
   )
 
-  const loading = journalsQuery.isLoading || detailsLoading
+  const digestKey = baseModel.empty ? "" : baseModel.aiDigest
+
+  useEffect(() => {
+    setAiModel(null)
+    setAiStatus("idle")
+  }, [week.startDate, week.endDate])
+
+  useEffect(() => {
+    if (!token || !digestKey || detailsLoading || !allDetailsReady) return
+
+    let cancelled = false
+    const controller = new AbortController()
+    // Debounce so a late-arriving journal doesn't abort mid-flight unnecessarily
+    const timer = window.setTimeout(() => {
+      if (cancelled) return
+      setAiStatus("loading")
+
+      void (async () => {
+        try {
+          const res = await aiApi.weeklyReviewInsights(
+            { week_label: baseModel.weekLabel, digest: digestKey },
+            token,
+            controller.signal,
+          )
+          if (cancelled) return
+          if (res.fallback || !res.insights || !Object.keys(res.insights).length) {
+            setAiModel(null)
+            setAiStatus("ready")
+            return
+          }
+          setAiModel(
+            applyWeeklyAiInsights(
+              baseModel,
+              res.insights as Parameters<typeof applyWeeklyAiInsights>[1],
+            ),
+          )
+          setAiStatus("ready")
+        } catch {
+          if (cancelled) return
+          setAiModel(null)
+          setAiStatus("error")
+        }
+      })()
+    }, 350)
+
+    return () => {
+      cancelled = true
+      controller.abort()
+      window.clearTimeout(timer)
+    }
+    // Intentionally keyed on digest string, not baseModel object identity
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, digestKey, detailsLoading, allDetailsReady, week.startDate])
+
+  // Keep AI prose; always pin numbers to latest journal-derived base model
+  const model = useMemo(() => {
+    if (!aiModel || aiModel.aiDigest !== baseModel.aiDigest) return baseModel
+    // Re-apply so mistake counts stay locked to journal even if AI invented occurrences
+    return {
+      ...aiModel,
+      ...pickStableStats(baseModel),
+      mistakes: aiModel.mistakes.map((m) => {
+        const base = baseModel.mistakes.find((x) => {
+          const a = x.title.toLowerCase()
+          const b = m.title.toLowerCase()
+          return a === b || a.includes(b) || b.includes(a)
+        })
+        if (!base) return m
+        return {
+          ...m,
+          title: base.title,
+          count: base.count,
+          days: base.days,
+          moneyLost: base.moneyLost,
+          moneyLostLabel: base.moneyLostLabel,
+          relatedTradeLabels: base.relatedTradeLabels,
+        }
+      }),
+      insightsSource: "ai" as const,
+    }
+  }, [aiModel, baseModel])
+
+  const loading = journalsQuery.isLoading || detailsLoading || !allDetailsReady
 
   const exportText = () => {
     const lines = [
       `Weekly Review — ${model.weekLabel}`,
       `Net P&L: ${model.kpis[0]?.value}`,
       `Grade: ${model.grade}`,
+      `Insights: ${model.insightsSource}`,
       "",
       "What worked:",
-      ...model.whatWorked.map((w) => `- ${w.title}`),
+      ...model.whatWorked.map((w) => `- ${w.title}: ${w.description}`),
       "",
       "Mistakes:",
-      ...model.mistakes.map((m) => `- ${m.title} (${m.severity})`),
+      ...model.mistakes.map(
+        (m) =>
+          `- ${m.title} ×${m.count} [${m.days.join(", ")}] impact=${m.moneyLostLabel} → ${m.recommendation}`,
+      ),
       "",
-      "Focus:",
-      ...model.focusAreas.map((f) => `${f.number}. ${f.title}`),
+      "Lessons:",
+      ...model.lessons.map((l) => `- ${l.title}: ${l.body}`),
+      "",
+      "Setups:",
+      ...model.setups.map(
+        (s) => `- ${s.setup}: n=${s.count} WR=${s.winRate ?? "—"}% pnl=${s.netPnlLabel}`,
+      ),
       "",
       model.coach.summary,
       model.coach.advice,
@@ -546,11 +832,19 @@ export function WeeklyReviewDashboard() {
         </div>
         <div className="wr-header__actions">
           <div className="wr-week-nav" aria-label="Week selector">
-            <button type="button" aria-label="Previous week" onClick={() => setAnchor(shiftTradingWeek(anchor, -1))}>
+            <button
+              type="button"
+              aria-label="Previous week"
+              onClick={() => setAnchor(shiftTradingWeek(anchor, -1))}
+            >
               <ChevronLeft size={16} />
             </button>
             <span className="wr-week-nav__label">{week.label}</span>
-            <button type="button" aria-label="Next week" onClick={() => setAnchor(shiftTradingWeek(anchor, 1))}>
+            <button
+              type="button"
+              aria-label="Next week"
+              onClick={() => setAnchor(shiftTradingWeek(anchor, 1))}
+            >
               <ChevronRight size={16} />
             </button>
           </div>
@@ -585,18 +879,24 @@ export function WeeklyReviewDashboard() {
               <KpiCard key={k.id} kpi={k} />
             ))}
             <GradeRing grade={model.grade} stars={model.gradeStars} />
-            <div className="wr-kpi wr-kpi--chart" data-tone="neutral">
-              <p className="wr-kpi__label">Daily P&L This Week</p>
-              <ResponsiveContainer width="100%" height={70}>
-                <BarChart data={model.dailyPnl}>
-                  <Bar dataKey="pnl" radius={[4, 4, 0, 0]}>
-                    {model.dailyPnl.map((d) => (
-                      <Cell key={d.date} fill={d.pnl >= 0 ? "#22c55e" : "#f43f5e"} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+          </div>
+
+          <div className="wr-ai-status">
+            {aiStatus === "loading" ? (
+              <>
+                <Loader2 size={14} className="wr-spin" />
+                Harry AI is reviewing all journals for this week…
+              </>
+            ) : model.insightsSource === "ai" ? (
+              <>
+                <Sparkles size={14} />
+                Insights synthesized by Harry AI from this week&apos;s journals
+              </>
+            ) : aiStatus === "error" ? (
+              <>Pattern analysis from journals (AI unavailable — showing evidence-based rollup)</>
+            ) : (
+              <>Pattern analysis from journals</>
+            )}
           </div>
 
           <p className="wr-section-title">Weekly Insights</p>
@@ -623,6 +923,9 @@ export function WeeklyReviewDashboard() {
               <LessonList items={model.lessons} />
             </section>
           </div>
+
+          <p className="wr-section-title">Day-by-Day Recall</p>
+          <DayBriefs items={model.dayBriefs} />
 
           <p className="wr-section-title">Action Dashboard</p>
           <div className="wr-grid-3">
@@ -697,7 +1000,9 @@ export function WeeklyReviewDashboard() {
                       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                     />
                   </div>
-                  <strong style={{ fontSize: "0.75rem", width: 36, textAlign: "right" }}>{s.value}%</strong>
+                  <strong style={{ fontSize: "0.75rem", width: 36, textAlign: "right" }}>
+                    {s.value}%
+                  </strong>
                 </div>
               ))}
             </div>

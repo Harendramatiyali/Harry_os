@@ -131,6 +131,14 @@
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 }
 
+.wr-kpi--chart {
+  grid-column: span 4;
+}
+
+.wr-kpi--span2 {
+  grid-column: span 2;
+}
+
 .wr-kpi--grade {
   grid-column: span 2;
   display: flex;
@@ -139,10 +147,6 @@
   justify-content: center;
   text-align: center;
   gap: 6px;
-}
-
-.wr-kpi--chart {
-  grid-column: span 4;
 }
 
 .wr-kpi__top {
@@ -344,6 +348,112 @@
   font-size: 0.75rem;
   color: var(--tv2-muted);
   line-height: 1.4;
+}
+
+.wr-item__evidence {
+  margin: 6px 0 0;
+  font-size: 0.6875rem;
+  color: #a5b4fc;
+  line-height: 1.4;
+}
+
+.wr-item--stack {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.wr-item__row {
+  display: flex;
+  gap: 10px;
+}
+
+.wr-mistake-detail {
+  margin-top: 8px;
+  margin-left: 42px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(244, 63, 94, 0.06);
+  border: 1px solid rgba(244, 63, 94, 0.15);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--tv2-fg);
+}
+
+.wr-mistake-detail p {
+  margin: 0 0 6px;
+}
+
+.wr-mistake-detail p:last-child {
+  margin-bottom: 0;
+}
+
+.wr-ai-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: #c4b5fd;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  background: rgba(168, 85, 247, 0.08);
+  width: fit-content;
+}
+
+.wr-spin {
+  animation: wr-spin 0.9s linear infinite;
+}
+
+@keyframes wr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.wr-day-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.wr-day-card {
+  border: 1px solid var(--tv2-border-soft);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.wr-day-card[data-tone="pos"] {
+  border-color: rgba(34, 197, 94, 0.22);
+}
+
+.wr-day-card[data-tone="neg"] {
+  border-color: rgba(244, 63, 94, 0.22);
+}
+
+.wr-day-card header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.8125rem;
+}
+
+.wr-day-card ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  font-size: 0.75rem;
+  color: var(--tv2-muted);
+  line-height: 1.4;
+}
+
+.wr-day-card li {
+  margin-bottom: 4px;
+}
+
+.wr-day-issues li {
+  color: #fb7185;
 }
 
 .wr-item__meta {

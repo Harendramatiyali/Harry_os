@@ -571,17 +571,7 @@ export function TradingV2ConnectedLayout() {
     journalList
   ) : secondaryTab === "calendar" ? (
     journalList
-  ) : secondaryTab === "weekly-review" ? (
-    <div className="tv2-card space-y-3 p-4">
-      <h2 className="tv2-h2">Weekly Review</h2>
-      <p className="tv2-caption">
-        Five-minute coach view of your week — KPIs, repeating mistakes, setups, and next-week focus.
-      </p>
-      <button type="button" className="tv2-btn tv2-btn-sm" onClick={() => onSecondaryTabChange("journal")}>
-        Open Journal
-      </button>
-    </div>
-  ) : (
+  ) : secondaryTab === "weekly-review" ? null : (
     <div className="tv2-card space-y-3 p-4">
       <h2 className="tv2-h2">{SECONDARY_TABS.find((t) => t.id === secondaryTab)?.label}</h2>
       <p className="tv2-caption">
@@ -616,7 +606,9 @@ export function TradingV2ConnectedLayout() {
       ))}
       left={left}
       center={center}
+      wide={secondaryTab === "weekly-review"}
       right={
+        secondaryTab === "weekly-review" ? null : (
         <>
           <TradeHistoryCard
             items={trades.slice(0, 8)}
@@ -645,6 +637,7 @@ export function TradingV2ConnectedLayout() {
             onAction={onQuickAction}
           />
         </>
+        )
       }
     />
   )

@@ -63,3 +63,14 @@ export type WritingPolishResponse = {
   model: string | null
   unchanged: boolean
 }
+
+export type WeeklyReviewInsightsRequest = {
+  week_label: string
+  digest: string
+}
+
+export type WeeklyReviewInsightsResponse = {
+  insights: Record<string, unknown>
+  model: string | null
+  fallback: boolean
+}
