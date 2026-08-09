@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import Annotated, Literal
+from typing import Literal
 
-from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
+from pydantic import field_validator, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 def _empty_to_none(value: object) -> object:
@@ -15,14 +15,14 @@ def _empty_to_none(value: object) -> object:
     return value
 
 
-def _parse_str_list(value: object) -> object:
-    """Accept JSON arrays or comma-separated strings from host env UIs."""
+def _parse_str_list(value: object) -> list[str]:
+    """Accept JSON arrays, comma-separated strings, or real lists."""
     if value is None:
-        return value
+        return []
     if isinstance(value, list):
-        return value
+        return [str(item).strip() for item in value if str(item).strip()]
     if not isinstance(value, str):
-        return value
+        return [str(value)]
 
     raw = value.strip()
     if not raw:
@@ -49,6 +49,8 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
+        # Host platforms (Render) often pass list-like env as plain strings.
+        enable_decoding=False,
     )
 
     # Application
@@ -57,10 +59,8 @@ class Settings(BaseSettings):
     app_debug: bool = False
     app_version: str = "0.1.0"
     api_prefix: str = "/api/v1"
-    # NoDecode: host env UIs often use comma lists; default JSON decode breaks those.
-    cors_origins: Annotated[list[str], NoDecode] = Field(
-        default_factory=lambda: ["http://localhost:5173"]
-    )
+    # Stored as string so env never hits JSON list decoding.
+    cors_origins: str = "http://localhost:5173"
 
     # Security
     secret_key: str = "change-me"
@@ -91,16 +91,8 @@ class Settings(BaseSettings):
     llm_model: str = "gpt-4o-mini"
     embedding_model: str = "text-embedding-3-small"
     embedding_dimensions: int = 1536
-    ai_allowed_modules: Annotated[list[str], NoDecode] = Field(
-        default_factory=lambda: [
-            "trading",
-            "books",
-            "finance",
-            "health",
-            "planner",
-            "goals",
-            "knowledge",
-        ]
+    ai_allowed_modules: str = (
+        "trading,books,finance,health,planner,goals,knowledge"
     )
     ai_max_context_messages: int = 40
     ai_rag_top_k: int = 8
@@ -111,9 +103,13 @@ class Settings(BaseSettings):
     @field_validator("app_env", mode="before")
     @classmethod
     def normalize_app_env(cls, value: object) -> object:
+        if value is None:
+            return "local"
         if not isinstance(value, str):
             return value
         normalized = value.strip().lower()
+        if not normalized:
+            return "local"
         aliases = {
             "production": "prod",
             "prod": "prod",
@@ -126,8 +122,11 @@ class Settings(BaseSettings):
 
     @field_validator("cors_origins", "ai_allowed_modules", mode="before")
     @classmethod
-    def parse_list_fields(cls, value: object) -> object:
-        return _parse_str_list(value)
+    def stringify_list_env(cls, value: object) -> object:
+        # If a platform injects a real list, flatten to comma string.
+        if isinstance(value, list):
+            return ",".join(str(item).strip() for item in value if str(item).strip())
+        return value
 
     @field_validator(
         "llm_api_key",
@@ -138,6 +137,23 @@ class Settings(BaseSettings):
     @classmethod
     def optional_str_fields(cls, value: object) -> object:
         return _empty_to_none(value)
+
+    @model_validator(mode="after")
+    def drop_bundled_obsidian_path_in_prod(self) -> Settings:
+        # Local .env must never ship into prod containers.
+        if self.is_production and self.obsidian_vault_path and self.obsidian_vault_path.startswith(
+            "/Users/"
+        ):
+            self.obsidian_vault_path = None
+        return self
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return _parse_str_list(self.cors_origins)
+
+    @property
+    def ai_allowed_module_list(self) -> list[str]:
+        return _parse_str_list(self.ai_allowed_modules)
 
     @property
     def is_production(self) -> bool:

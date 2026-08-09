@@ -210,7 +210,7 @@ class AiService:
             history_ready=True,
             imports_ready=True,
             writing_polish_ready=llm_ready,
-            allowed_modules=list(self.settings.ai_allowed_modules),
+            allowed_modules=list(self.settings.ai_allowed_module_list),
             llm_model=self.settings.llm_model,
             embedding_model=self.settings.embedding_model,
             example_prompts=EXAMPLE_PROMPTS,
@@ -523,7 +523,7 @@ class AiService:
     async def reindex(self, user_id: str, data: IndexRequest) -> IndexStatus:
         """Collect personal snippets → register chunks → (future) embed + upsert vectors."""
         snippets = await self.personal_data.collect(
-            user_id, modules=data.modules or list(self.settings.ai_allowed_modules)
+            user_id, modules=data.modules or list(self.settings.ai_allowed_module_list)
         )
         registered = 0
         for snip in snippets:
@@ -555,7 +555,7 @@ class AiService:
                 "Personal-data RAG indexing is not implemented yet. "
                 "Chunk registry and vector-store ports are ready.",
                 details={
-                    "modules": data.modules or self.settings.ai_allowed_modules,
+                    "modules": data.modules or self.settings.ai_allowed_module_list,
                     "chunks_registered": total,
                     "chunks_indexed": indexed,
                     "force": data.force,
