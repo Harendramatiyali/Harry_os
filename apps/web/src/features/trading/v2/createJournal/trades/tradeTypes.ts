@@ -299,7 +299,6 @@ export function riskReward(trade: Pick<DraftTradeReview, "entry" | "exit" | "sto
   const exit = numOrNull(trade.exit)
   const stop = numOrNull(trade.stop)
   if (entry == null || exit == null || stop == null) return null
-  const long = !trade.direction || trade.direction.toLowerCase() === "long"
   const reward = Math.abs(exit - entry)
   const risk = Math.abs(entry - stop)
   if (risk <= 0) return null

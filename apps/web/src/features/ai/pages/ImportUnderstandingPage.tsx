@@ -337,7 +337,7 @@ function UnderstandingBody({
               variant="outline"
               disabled={busy}
               className="rounded-xl border-white/15"
-              onClick={() => setPickerOpen((v) => !v)}
+              onClick={() => setPickerOpen(!pickerOpen)}
             >
               Change
             </Button>

@@ -483,7 +483,7 @@ function SectionTitle({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Icon className="size-4" style={{ color: "var(--module-accent)" }} />
+      <Icon className="size-4 text-[color:var(--module-accent)]" />
       <h2 className="text-base font-semibold tracking-tight">{label}</h2>
       <span
         className="rounded-md px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase"
