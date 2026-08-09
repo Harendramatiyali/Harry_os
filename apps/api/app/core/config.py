@@ -41,6 +41,29 @@ def _parse_str_list(value: object) -> list[str]:
     return [part.strip().strip('"').strip("'") for part in raw.split(",") if part.strip()]
 
 
+def _parse_bool(value: object) -> object:
+    """Accept common host-env boolean forms; ignore accidental KEY=KEY mistakes."""
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        raw = value.strip()
+        if not raw:
+            return False
+        lowered = raw.lower()
+        # Render UI mistake: value pasted as the variable name itself.
+        if lowered in {"ai_enabled", "app_debug", "database_echo", "log_json"}:
+            return False
+        if lowered in {"1", "true", "t", "yes", "y", "on"}:
+            return True
+        if lowered in {"0", "false", "f", "no", "n", "off"}:
+            return False
+    return value
+
+
 class Settings(BaseSettings):
     """Typed 12-factor configuration for Harry OS API."""
 
@@ -119,6 +142,17 @@ class Settings(BaseSettings):
             "docker": "docker",
         }
         return aliases.get(normalized, normalized)
+
+    @field_validator(
+        "app_debug",
+        "database_echo",
+        "log_json",
+        "ai_enabled",
+        mode="before",
+    )
+    @classmethod
+    def normalize_bools(cls, value: object) -> object:
+        return _parse_bool(value)
 
     @field_validator("cors_origins", "ai_allowed_modules", mode="before")
     @classmethod
