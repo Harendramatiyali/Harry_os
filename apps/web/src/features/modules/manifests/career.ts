@@ -1,0 +1,78 @@
+import type { ModuleManifest } from "@/features/modules/types"
+import { reviewChrome, CAREER_SECTIONS } from "@/features/modules/manifests/reviewSections"
+
+export const careerManifest: ModuleManifest = {
+  id: "career",
+  name: "Career",
+  shortName: "Career",
+  tagline: "Meetings, projects, architecture",
+  parserType: "meeting",
+  destinationModule: "planner",
+  ready: false,
+  route: "/career",
+  identity: { icon: "Briefcase", mood: "workspace" },
+  theme: {
+    mode: "dark",
+    tokens: {
+      bg: "transparent",
+      fg: "hsl(210 20% 96%)",
+      muted: "hsl(215 12% 60%)",
+      card: "rgba(15, 18, 24, 0.7)",
+      border: "rgba(96, 165, 250, 0.16)",
+      accent: "#f59e0b",
+      accentSoft: "rgba(59, 130, 246, 0.14)",
+      positive: "hsl(152 55% 45%)",
+      negative: "hsl(0 70% 55%)",
+      warning: "hsl(38 90% 55%)",
+      paper: "rgba(12, 16, 24, 0.55)",
+      glow: "rgba(59, 130, 246, 0.14)",
+      progress: "rgba(96, 165, 250, 0.75)",
+      radius: "1.15rem",
+    },
+  },
+  import: {
+    upload: {
+      eyebrow: "Career · Import",
+      title: "Workspace Notes",
+      description: "Meeting, sprint, architecture, or project notes — structured for follow-ups.",
+      dropTitle: "Drop workspace pages",
+      dropHint: "Meetings · architecture · sprint notes",
+      sessionLabel: "Meeting / project title",
+      sessionPlaceholder: "e.g. Sprint planning — API redesign",
+      addImagesLabel: "Add pages",
+      changeImagesLabel: "Change pages",
+      processLabel: "Process notes",
+      reprocessLabel: "Re-process notes",
+    },
+    understand: {
+      title: "Career document?",
+      description: "Confirm Career for meetings, tasks, and follow-ups.",
+    },
+    review: reviewChrome({
+      title: "Review Career",
+      description: "Review AI-extracted sections, then save.",
+      imagesHeading: "Original Notebook",
+      saveLabel: "Save Meeting Notes",
+      successTitle: "Successfully Saved!",
+      successCta: "View in Career",
+      successRoute: "/career",
+    }),
+    motion: ["soft-expand", "fade-rise"],
+  },
+  review: {
+    layout: "workspace-board",
+    hero: "notebook",
+    showConfidence: true,
+    sections: CAREER_SECTIONS,
+    fieldGroups: [
+      { id: "header", label: "Meeting", order: 0 },
+      { id: "body", label: "Discussion", order: 1 },
+      { id: "planned", label: "Tasks & follow-ups", order: 2 },
+    ],
+  },
+  surfaces: {
+    headerStyle: "workspace",
+    navStyle: "dense",
+    dashboardWidgets: ["open-import"],
+  },
+}

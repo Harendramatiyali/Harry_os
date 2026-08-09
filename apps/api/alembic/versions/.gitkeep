@@ -1,0 +1,2 @@
+# Placeholder package for Alembic revision scripts.
+# Generate with: alembic revision --autogenerate -m "message"

@@ -1,0 +1,268 @@
+.ai-textarea {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.ai-textarea__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ai-textarea__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ai-textarea__title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--tv2-fg, hsl(var(--foreground)));
+}
+
+.ai-textarea__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--tv2-muted, hsl(var(--muted-foreground)));
+  border: 1px solid var(--tv2-border-soft, hsl(var(--border)));
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.ai-textarea__desc {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--tv2-muted, hsl(var(--muted-foreground)));
+}
+
+.ai-textarea__editor {
+  border: 1px solid var(--tv2-border, hsl(var(--border)));
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--tv2-elevated, hsl(var(--card)));
+}
+
+.ai-textarea__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--tv2-border-soft, hsl(var(--border)));
+}
+
+.ai-textarea__tool {
+  width: 30px;
+  height: 28px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--tv2-muted, hsl(var(--muted-foreground)));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ai-textarea__tool:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--tv2-fg, hsl(var(--foreground)));
+}
+
+.ai-textarea__editor textarea {
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--tv2-fg, hsl(var(--foreground)));
+  padding: 14px;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  font-family: inherit;
+  display: block;
+}
+
+.ai-textarea__editor textarea::placeholder {
+  color: rgba(139, 146, 158, 0.85);
+}
+
+.ai-textarea__preview-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-textarea__arrow {
+  text-align: center;
+  color: var(--tv2-muted, hsl(var(--muted-foreground)));
+  font-size: 0.875rem;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.ai-textarea__preview {
+  border: 1px solid var(--tv2-border-soft, hsl(var(--border)));
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ai-textarea__preview--accepted {
+  border-color: rgba(52, 211, 153, 0.45);
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.15);
+}
+
+.ai-textarea__preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--tv2-border-soft, hsl(var(--border)));
+}
+
+.ai-textarea__preview[data-expanded="false"] .ai-textarea__preview-head {
+  border-bottom: 0;
+}
+
+.ai-textarea__preview-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tv2-muted, hsl(var(--muted-foreground)));
+}
+
+.ai-textarea__icon-btn {
+  border: 0;
+  background: transparent;
+  color: var(--tv2-muted, hsl(var(--muted-foreground)));
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ai-textarea__icon-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--tv2-fg, hsl(var(--foreground)));
+}
+
+.ai-textarea__preview-body {
+  overflow: hidden;
+}
+
+.ai-textarea__markdown {
+  padding: 12px 14px 14px;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--tv2-fg, hsl(var(--foreground)));
+}
+
+.ai-textarea__markdown p {
+  margin: 0 0 0.65em;
+}
+
+.ai-textarea__markdown p:last-child {
+  margin-bottom: 0;
+}
+
+.ai-textarea__markdown ul,
+.ai-textarea__markdown ol {
+  margin: 0 0 0.65em;
+  padding-left: 1.25rem;
+}
+
+.ai-textarea__muted {
+  margin: 0;
+  padding: 12px 14px 14px;
+  font-size: 0.8125rem;
+  color: var(--tv2-muted, hsl(var(--muted-foreground)));
+}
+
+.ai-textarea__error {
+  margin: 0;
+  padding: 12px 14px 14px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #f87171;
+}
+
+.ai-textarea__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ai-textarea__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 11px;
+  border-radius: 9px;
+  border: 1px solid var(--tv2-border, hsl(var(--border)));
+  background: transparent;
+  color: var(--tv2-fg, hsl(var(--foreground)));
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.ai-textarea__btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ai-textarea__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ai-textarea__btn--primary {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.ai-textarea__btn--ghost {
+  border-color: transparent;
+  color: var(--tv2-muted, hsl(var(--muted-foreground)));
+}
+
+.ai-textarea__spin {
+  animation: ai-textarea-spin 0.8s linear infinite;
+}
+
+@keyframes ai-textarea-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .ai-textarea__actions {
+    gap: 4px;
+  }
+
+  .ai-textarea__btn {
+    flex: 1 1 auto;
+  }
+}

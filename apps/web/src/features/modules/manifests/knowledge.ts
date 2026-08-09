@@ -1,0 +1,78 @@
+import type { ModuleManifest } from "@/features/modules/types"
+import { reviewChrome, KNOWLEDGE_SECTIONS } from "@/features/modules/manifests/reviewSections"
+
+export const knowledgeManifest: ModuleManifest = {
+  id: "knowledge",
+  name: "Knowledge",
+  shortName: "Knowledge",
+  tagline: "Clean personal notes",
+  parserType: "research",
+  destinationModule: "knowledge",
+  ready: false,
+  route: "/knowledge",
+  identity: { icon: "StickyNote", mood: "notes" },
+  theme: {
+    mode: "light",
+    tokens: {
+      bg: "transparent",
+      fg: "#171717",
+      muted: "#737373",
+      card: "rgba(255, 255, 255, 0.82)",
+      border: "rgba(23, 23, 23, 0.1)",
+      accent: "#a3a3a3",
+      accentSoft: "rgba(64, 64, 64, 0.08)",
+      positive: "#16a34a",
+      negative: "#dc2626",
+      warning: "#d97706",
+      paper: "rgba(250, 250, 250, 0.95)",
+      glow: "rgba(23, 23, 23, 0.06)",
+      progress: "rgba(64, 64, 64, 0.55)",
+      radius: "1.25rem",
+    },
+  },
+  import: {
+    upload: {
+      eyebrow: "Knowledge · Import",
+      title: "Notes Import",
+      description: "General knowledge pages — title, summary, notes, and tags.",
+      dropTitle: "Drop note pages",
+      dropHint: "Clean scans · multiple pages welcome",
+      sessionLabel: "Note title",
+      sessionPlaceholder: "e.g. Research dump — APIs",
+      addImagesLabel: "Add pages",
+      changeImagesLabel: "Change pages",
+      processLabel: "Process notes",
+      reprocessLabel: "Re-process notes",
+    },
+    understand: {
+      title: "General notes?",
+      description: "Confirm Knowledge for a clean notes review.",
+    },
+    review: reviewChrome({
+      title: "Review Knowledge",
+      description: "Review AI-extracted sections, then save.",
+      imagesHeading: "Original Notebook",
+      saveLabel: "Save Notes",
+      successTitle: "Successfully Saved!",
+      successCta: "View in Knowledge",
+      successRoute: "/knowledge",
+    }),
+    motion: ["fade-rise"],
+  },
+  review: {
+    layout: "notes-clean",
+    hero: "notebook",
+    showConfidence: true,
+    sections: KNOWLEDGE_SECTIONS,
+    fieldGroups: [
+      { id: "header", label: "Title", order: 0 },
+      { id: "body", label: "Notes", order: 1 },
+      { id: "planned", label: "Tags & references", order: 2 },
+    ],
+  },
+  surfaces: {
+    headerStyle: "notes",
+    navStyle: "airy",
+    dashboardWidgets: ["open-import"],
+  },
+}

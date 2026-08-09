@@ -1,0 +1,78 @@
+import type { ModuleManifest } from "@/features/modules/types"
+import { reviewChrome, HEALTH_SECTIONS } from "@/features/modules/manifests/reviewSections"
+
+export const healthManifest: ModuleManifest = {
+  id: "health",
+  name: "Health",
+  shortName: "Health",
+  tagline: "Workouts, nutrition, progress",
+  parserType: "health",
+  destinationModule: "health",
+  ready: false,
+  route: "/health",
+  identity: { icon: "HeartPulse", mood: "wellness" },
+  theme: {
+    mode: "dark",
+    tokens: {
+      bg: "transparent",
+      fg: "hsl(170 20% 96%)",
+      muted: "hsl(175 10% 60%)",
+      card: "rgba(10, 18, 20, 0.88)",
+      border: "rgba(20, 184, 166, 0.22)",
+      accent: "#14b8a6",
+      accentSoft: "rgba(20, 184, 166, 0.14)",
+      positive: "#10b981",
+      negative: "#f43f5e",
+      warning: "#f59e0b",
+      paper: "rgba(8, 16, 18, 0.9)",
+      glow: "rgba(20, 184, 166, 0.16)",
+      progress: "rgba(20, 184, 166, 0.75)",
+      radius: "1.25rem",
+    },
+  },
+  import: {
+    upload: {
+      eyebrow: "Health · Import",
+      title: "Health Notebook",
+      description: "Workout, diet, or medical notes — structured for progress tracking.",
+      dropTitle: "Drop health notebook pages",
+      dropHint: "Workouts · nutrition · measurements",
+      sessionLabel: "Session title",
+      sessionPlaceholder: "e.g. Week 12 strength log",
+      addImagesLabel: "Add pages",
+      changeImagesLabel: "Change pages",
+      processLabel: "Process notes",
+      reprocessLabel: "Re-process notes",
+    },
+    understand: {
+      title: "Health notes?",
+      description: "Confirm Health for workouts, nutrition, and progress.",
+    },
+    review: reviewChrome({
+      title: "Review Health",
+      description: "Review AI-extracted sections, then save.",
+      imagesHeading: "Original Notebook",
+      saveLabel: "Save Health Notes",
+      successTitle: "Successfully Saved!",
+      successCta: "View in Health",
+      successRoute: "/health",
+    }),
+    motion: ["soft-expand", "fade-rise"],
+  },
+  review: {
+    layout: "vitals-split",
+    hero: "notebook",
+    showConfidence: true,
+    sections: HEALTH_SECTIONS,
+    fieldGroups: [
+      { id: "header", label: "Session", order: 0 },
+      { id: "body", label: "Notes", order: 1 },
+      { id: "planned", label: "Metrics", order: 2 },
+    ],
+  },
+  surfaces: {
+    headerStyle: "vital",
+    navStyle: "airy",
+    dashboardWidgets: ["open-import"],
+  },
+}

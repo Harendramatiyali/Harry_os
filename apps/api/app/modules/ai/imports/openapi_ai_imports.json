@@ -1,0 +1,2071 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Harry OS \u2014 AI Import Center",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/ai/imports/jobs": {
+      "post": {
+        "tags": [
+          "ai",
+          "ai-imports"
+        ],
+        "summary": "Create Import Session",
+        "description": "Create a notebook import session (empty until images are uploaded).",
+        "operationId": "create_import_session_api_v1_ai_imports_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportJobCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportJobOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/imports/jobs/{job_id}/pages": {
+      "post": {
+        "tags": [
+          "ai",
+          "ai-imports"
+        ],
+        "summary": "Upload Images",
+        "description": "Upload one or more notebook page images to an import session.",
+        "operationId": "upload_images_api_v1_ai_imports_jobs__job_id__pages_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_images_api_v1_ai_imports_jobs__job_id__pages_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ImportPageOut"
+                  },
+                  "title": "Response Upload Images Api V1 Ai Imports Jobs  Job Id  Pages Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "ai",
+          "ai-imports"
+        ],
+        "summary": "Get Uploaded Images",
+        "operationId": "get_uploaded_images_api_v1_ai_imports_jobs__job_id__pages_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ImportPageOut"
+                  },
+                  "title": "Response Get Uploaded Images Api V1 Ai Imports Jobs  Job Id  Pages Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/imports/jobs/{job_id}/pages/{page_id}": {
+      "delete": {
+        "tags": [
+          "ai",
+          "ai-imports"
+        ],
+        "summary": "Delete Image",
+        "operationId": "delete_image_api_v1_ai_imports_jobs__job_id__pages__page_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "page_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Page Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/imports/pages/{page_id}/file": {
+      "get": {
+        "tags": [
+          "ai",
+          "ai-imports"
+        ],
+        "summary": "Get Import Page File",
+        "description": "Serve a stored notebook page image. Auth via Bearer or access_token query.",
+        "operationId": "get_import_page_file_api_v1_ai_imports_pages__page_id__file_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Page Id"
+            }
+          },
+          {
+            "name": "access_token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional access token for <img src> (Bearer header preferred).",
+              "title": "Access Token"
+            },
+            "description": "Optional access token for <img src> (Bearer header preferred)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "image/*": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/imports/jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "ai",
+          "ai-imports"
+        ],
+        "summary": "Get Import Status",
+        "operationId": "get_import_status_api_v1_ai_imports_jobs__job_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportJobStatusOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/imports/jobs/{job_id}/preview": {
+      "post": {
+        "tags": [
+          "ai",
+          "ai-imports"
+        ],
+        "summary": "Generate Preview",
+        "description": "Run extraction pipeline (scaffold) and return a reviewable journal draft.",
+        "operationId": "generate_preview_api_v1_ai_imports_jobs__job_id__preview_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ImportPreviewRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportPreviewOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/imports/jobs/{job_id}/commit": {
+      "post": {
+        "tags": [
+          "ai",
+          "ai-imports"
+        ],
+        "summary": "Save Journal",
+        "description": "Commit the reviewed draft into Trading Journals (`source=native`).\n\nRejects with 409 if a journal already exists for the draft `journal_date`.",
+        "operationId": "save_journal_api_v1_ai_imports_jobs__job_id__commit_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ImportCommitRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportCommitOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ConfidenceMap": {
+        "properties": {
+          "overall": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall"
+          },
+          "journal_date": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Journal Date"
+          },
+          "fields": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Fields"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "title": "ConfidenceMap"
+      },
+      "ImportCommitOut": {
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "title": "Job Id"
+          },
+          "journal_day_id": {
+            "type": "string",
+            "title": "Journal Day Id"
+          },
+          "journal_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Journal Date"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "review_status": {
+            "type": "string",
+            "title": "Review Status"
+          },
+          "trade_count": {
+            "type": "integer",
+            "title": "Trade Count"
+          },
+          "section_count": {
+            "type": "integer",
+            "title": "Section Count"
+          },
+          "attachment_count": {
+            "type": "integer",
+            "title": "Attachment Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "job_id",
+          "journal_day_id",
+          "journal_date",
+          "status",
+          "review_status",
+          "trade_count",
+          "section_count",
+          "attachment_count"
+        ],
+        "title": "ImportCommitOut"
+      },
+      "ImportCommitRequest": {
+        "properties": {
+          "draft": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JournalDraft-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "approve": {
+            "type": "boolean",
+            "title": "Approve",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "ImportCommitRequest",
+        "description": "Save Journal \u2014 optional draft override; otherwise uses stored preview draft."
+      },
+      "ImportFilePreview": {
+        "properties": {
+          "vault_path": {
+            "type": "string",
+            "title": "Vault Path"
+          },
+          "folder_path": {
+            "type": "string",
+            "title": "Folder Path"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "area": {
+            "$ref": "#/components/schemas/NoteArea"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/app__modules__knowledge__schemas__NoteKind"
+          },
+          "journal_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Journal Date"
+          },
+          "word_count": {
+            "type": "integer",
+            "title": "Word Count"
+          },
+          "is_empty": {
+            "type": "boolean",
+            "title": "Is Empty"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "vault_path",
+          "folder_path",
+          "title",
+          "area",
+          "kind",
+          "journal_date",
+          "word_count",
+          "is_empty",
+          "action"
+        ],
+        "title": "ImportFilePreview"
+      },
+      "ImportFolderGroup": {
+        "properties": {
+          "folder_path": {
+            "type": "string",
+            "title": "Folder Path"
+          },
+          "area": {
+            "$ref": "#/components/schemas/NoteArea"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "empty": {
+            "type": "integer",
+            "title": "Empty"
+          },
+          "create": {
+            "type": "integer",
+            "title": "Create"
+          },
+          "update": {
+            "type": "integer",
+            "title": "Update"
+          },
+          "skip": {
+            "type": "integer",
+            "title": "Skip"
+          },
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/ImportFilePreview"
+            },
+            "type": "array",
+            "title": "Files"
+          }
+        },
+        "type": "object",
+        "required": [
+          "folder_path",
+          "area",
+          "count",
+          "empty",
+          "create",
+          "update",
+          "skip",
+          "files"
+        ],
+        "title": "ImportFolderGroup",
+        "description": "One Obsidian folder bucket for side-by-side checking."
+      },
+      "ImportJobCreate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "notebook_label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notebook Label"
+          },
+          "detected_journal_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detected Journal Date"
+          }
+        },
+        "type": "object",
+        "title": "ImportJobCreate"
+      },
+      "ImportJobOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "notebook_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notebook Label"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "review_status": {
+            "type": "string",
+            "title": "Review Status"
+          },
+          "current_stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Stage"
+          },
+          "page_count": {
+            "type": "integer",
+            "title": "Page Count"
+          },
+          "overall_confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall Confidence"
+          },
+          "draft_version": {
+            "type": "integer",
+            "title": "Draft Version"
+          },
+          "detected_journal_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detected Journal Date"
+          },
+          "committed_journal_day_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Committed Journal Day Id"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "prompt_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Version"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "notebook_label",
+          "status",
+          "review_status",
+          "current_stage",
+          "page_count",
+          "overall_confidence",
+          "draft_version",
+          "detected_journal_date",
+          "committed_journal_day_id",
+          "model_id",
+          "prompt_version",
+          "error_code",
+          "error_message",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ImportJobOut"
+      },
+      "ImportJobStatusOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "notebook_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notebook Label"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "review_status": {
+            "type": "string",
+            "title": "Review Status"
+          },
+          "current_stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Stage"
+          },
+          "page_count": {
+            "type": "integer",
+            "title": "Page Count"
+          },
+          "overall_confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall Confidence"
+          },
+          "draft_version": {
+            "type": "integer",
+            "title": "Draft Version"
+          },
+          "detected_journal_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detected Journal Date"
+          },
+          "committed_journal_day_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Committed Journal Day Id"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "prompt_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Version"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "has_draft": {
+            "type": "boolean",
+            "title": "Has Draft",
+            "default": false
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConfidenceMap"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/ImportPageOut"
+            },
+            "type": "array",
+            "title": "Pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "notebook_label",
+          "status",
+          "review_status",
+          "current_stage",
+          "page_count",
+          "overall_confidence",
+          "draft_version",
+          "detected_journal_date",
+          "committed_journal_day_id",
+          "model_id",
+          "prompt_version",
+          "error_code",
+          "error_message",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ImportJobStatusOut",
+        "description": "Status poll payload \u2014 includes draft presence + confidence map."
+      },
+      "ImportPageOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "job_id": {
+            "type": "string",
+            "title": "Job Id"
+          },
+          "page_index": {
+            "type": "integer",
+            "title": "Page Index"
+          },
+          "original_file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original File Name"
+          },
+          "mime_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mime Type"
+          },
+          "byte_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Byte Size"
+          },
+          "checksum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checksum"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "quality_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality Score"
+          },
+          "ocr_confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ocr Confidence"
+          },
+          "has_ocr_transcript": {
+            "type": "boolean",
+            "title": "Has Ocr Transcript",
+            "default": false
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "job_id",
+          "page_index",
+          "original_file_name",
+          "mime_type",
+          "byte_size",
+          "checksum",
+          "status",
+          "quality_score",
+          "ocr_confidence",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ImportPageOut"
+      },
+      "ImportPreviewOut": {
+        "properties": {
+          "job": {
+            "$ref": "#/components/schemas/ImportJobOut"
+          },
+          "draft": {
+            "$ref": "#/components/schemas/JournalDraft-Output"
+          },
+          "confidence": {
+            "$ref": "#/components/schemas/ConfidenceMap"
+          },
+          "draft_version": {
+            "type": "integer",
+            "title": "Draft Version"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "job",
+          "draft",
+          "confidence",
+          "draft_version"
+        ],
+        "title": "ImportPreviewOut"
+      },
+      "ImportPreviewRequest": {
+        "properties": {
+          "journal_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Journal Date"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "title": "ImportPreviewRequest",
+        "description": "Optional overrides when generating a preview draft."
+      },
+      "JournalDraft-Input": {
+        "properties": {
+          "journal_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Journal Date"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "market": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market"
+          },
+          "primary_instrument": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Instrument"
+          },
+          "day_bias": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day Bias"
+          },
+          "day_result": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day Result"
+          },
+          "day_pnl": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day Pnl"
+          },
+          "daily_rating": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Daily Rating"
+          },
+          "overall_grade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall Grade"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "uncategorized_markdown": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uncategorized Markdown"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/JournalDraftSection"
+            },
+            "type": "array",
+            "title": "Sections"
+          },
+          "trades": {
+            "items": {
+              "$ref": "#/components/schemas/JournalDraftTrade-Input"
+            },
+            "type": "array",
+            "title": "Trades"
+          },
+          "day_attachment_page_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Day Attachment Page Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "journal_date"
+        ],
+        "title": "JournalDraft",
+        "description": "Structured draft mirroring trading_journal_* before commit."
+      },
+      "JournalDraft-Output": {
+        "properties": {
+          "journal_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Journal Date"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "market": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market"
+          },
+          "primary_instrument": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Instrument"
+          },
+          "day_bias": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day Bias"
+          },
+          "day_result": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day Result"
+          },
+          "day_pnl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day Pnl"
+          },
+          "daily_rating": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Daily Rating"
+          },
+          "overall_grade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall Grade"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "uncategorized_markdown": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uncategorized Markdown"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/JournalDraftSection"
+            },
+            "type": "array",
+            "title": "Sections"
+          },
+          "trades": {
+            "items": {
+              "$ref": "#/components/schemas/JournalDraftTrade-Output"
+            },
+            "type": "array",
+            "title": "Trades"
+          },
+          "day_attachment_page_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Day Attachment Page Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "journal_date"
+        ],
+        "title": "JournalDraft",
+        "description": "Structured draft mirroring trading_journal_* before commit."
+      },
+      "JournalDraftSection": {
+        "properties": {
+          "section_key": {
+            "type": "string",
+            "title": "Section Key",
+            "default": "uncategorized"
+          },
+          "heading_original": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Heading Original"
+          },
+          "body_markdown": {
+            "type": "string",
+            "title": "Body Markdown",
+            "default": ""
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          }
+        },
+        "type": "object",
+        "title": "JournalDraftSection"
+      },
+      "JournalDraftTrade-Input": {
+        "properties": {
+          "trade_index": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Trade Index"
+          },
+          "title_suffix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title Suffix"
+          },
+          "instrument": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instrument"
+          },
+          "direction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Direction"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "entry_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entry Price"
+          },
+          "exit_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exit Price"
+          },
+          "stop_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stop Price"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "pnl": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pnl"
+          },
+          "setup": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Setup"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grade"
+          },
+          "dqs_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dqs Score"
+          },
+          "dqs_max": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dqs Max"
+          },
+          "raw_markdown": {
+            "type": "string",
+            "title": "Raw Markdown",
+            "default": ""
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/JournalDraftTradeSection"
+            },
+            "type": "array",
+            "title": "Sections"
+          },
+          "attachment_page_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Attachment Page Ids"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "trade_index"
+        ],
+        "title": "JournalDraftTrade"
+      },
+      "JournalDraftTrade-Output": {
+        "properties": {
+          "trade_index": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Trade Index"
+          },
+          "title_suffix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title Suffix"
+          },
+          "instrument": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instrument"
+          },
+          "direction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Direction"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "entry_price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entry Price"
+          },
+          "exit_price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exit Price"
+          },
+          "stop_price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stop Price"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "pnl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pnl"
+          },
+          "setup": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Setup"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grade"
+          },
+          "dqs_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dqs Score"
+          },
+          "dqs_max": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dqs Max"
+          },
+          "raw_markdown": {
+            "type": "string",
+            "title": "Raw Markdown",
+            "default": ""
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/JournalDraftTradeSection"
+            },
+            "type": "array",
+            "title": "Sections"
+          },
+          "attachment_page_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Attachment Page Ids"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "trade_index"
+        ],
+        "title": "JournalDraftTrade"
+      },
+      "JournalDraftTradeSection": {
+        "properties": {
+          "section_key": {
+            "type": "string",
+            "title": "Section Key",
+            "default": "uncategorized"
+          },
+          "heading_original": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Heading Original"
+          },
+          "body_markdown": {
+            "type": "string",
+            "title": "Body Markdown",
+            "default": ""
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          }
+        },
+        "type": "object",
+        "title": "JournalDraftTradeSection"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: harry_os
+      MYSQL_USER: harry
+      MYSQL_PASSWORD: harry
+    ports:
+      - "3306:3306"
+    volumes:
+      - harry_os_mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./apps/api/.env.example
+    environment:
+      APP_ENV: docker
+      DATABASE_URL: mysql+aiomysql://harry:harry@db:3306/harry_os
+      LOG_JSON: "true"
+    ports:
+      - "8000:8000"
+    volumes:
+      - harry_os_media:/data/media
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  harry_os_mysql:
+  harry_os_media:

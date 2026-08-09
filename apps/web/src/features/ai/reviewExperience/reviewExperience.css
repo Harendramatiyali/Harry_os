@@ -1,0 +1,301 @@
+/* Exact AI Review Experience — Phase 1 static layout tokens */
+
+.review-experience {
+  --re-bg: #0b0d10;
+  --re-surface: #12151a;
+  --re-elevated: #161a21;
+  --re-border: rgba(255, 255, 255, 0.08);
+  --re-border-soft: rgba(255, 255, 255, 0.06);
+  --re-fg: #f4f5f7;
+  --re-muted: #8b929e;
+  --re-accent: #22c55e;
+  --re-accent-soft: rgba(34, 197, 94, 0.12);
+  --re-radius: 16px;
+  --re-font: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  font-family: var(--re-font);
+  color: var(--re-fg);
+  background: var(--re-bg);
+  min-height: calc(100vh - 4rem);
+}
+
+.review-experience[data-module="trading"] {
+  --re-accent: #22c55e;
+  --re-accent-soft: rgba(34, 197, 94, 0.12);
+}
+
+.review-experience[data-module="books"] {
+  --re-accent: #a855f7;
+  --re-accent-soft: rgba(168, 85, 247, 0.12);
+}
+
+.review-experience[data-module="finance"] {
+  --re-accent: #3b82f6;
+  --re-accent-soft: rgba(59, 130, 246, 0.12);
+}
+
+.review-experience[data-module="career"] {
+  --re-accent: #f59e0b;
+  --re-accent-soft: rgba(245, 158, 11, 0.12);
+}
+
+.review-experience[data-module="health"] {
+  --re-accent: #10b981;
+  --re-accent-soft: rgba(16, 185, 129, 0.12);
+}
+
+.review-experience[data-module="knowledge"] {
+  --re-accent: #6366f1;
+  --re-accent-soft: rgba(99, 102, 241, 0.12);
+}
+
+.review-experience .re-title {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.review-experience .re-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+.review-experience .re-body {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.review-experience .re-caption {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--re-muted);
+}
+
+.review-experience .re-card {
+  background: var(--re-surface);
+  border: 1px solid var(--re-border);
+  border-radius: var(--re-radius);
+  /* No shadows, no gradients, no glass */
+  transition: border-color 180ms ease, background-color 180ms ease;
+}
+
+.review-experience .re-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.review-experience .re-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--re-border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--re-muted);
+  background: transparent;
+}
+
+.review-experience .re-badge-accent {
+  border-color: transparent;
+  background: var(--re-accent-soft);
+  color: var(--re-accent);
+}
+
+.review-experience .re-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid var(--re-border);
+  background: transparent;
+  color: var(--re-fg);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: default;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.review-experience .re-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.review-experience .re-btn-primary {
+  border-color: transparent;
+  background: var(--re-accent);
+  color: #0a0a0a;
+}
+
+.review-experience .re-btn-primary:hover {
+  background: var(--re-accent);
+  filter: brightness(1.05);
+}
+
+.review-experience .re-btn-ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--re-muted);
+}
+
+.review-experience .re-btn-sm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+  border-radius: 10px;
+}
+
+.review-experience .re-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--re-muted);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: default;
+  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+
+.review-experience .re-nav-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--re-fg);
+}
+
+.review-experience .re-nav-item[data-active="true"] {
+  background: var(--re-accent-soft);
+  color: var(--re-accent);
+  border-color: transparent;
+}
+
+.review-experience .re-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  flex-shrink: 0;
+}
+
+.review-experience .re-nav-item[data-active="true"] .re-nav-icon {
+  background: var(--re-accent);
+  color: #0a0a0a;
+}
+
+.review-experience .re-thumb {
+  aspect-ratio: 3 / 4;
+  border-radius: 10px;
+  border: 1px solid var(--re-border);
+  overflow: hidden;
+  background: #0a0c0f;
+  cursor: default;
+  transition: border-color 180ms ease;
+}
+
+.review-experience .re-thumb[data-active="true"] {
+  border-color: var(--re-accent);
+}
+
+.review-experience .re-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.review-experience .re-preview {
+  border-radius: var(--re-radius);
+  border: 1px solid var(--re-border);
+  background: #0a0c0f;
+  overflow: hidden;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.review-experience .re-preview img {
+  max-width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+}
+
+.review-experience .re-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 280px;
+  gap: 20px;
+  align-items: start;
+  padding-bottom: 96px;
+}
+
+@media (max-width: 1100px) {
+  .review-experience .re-layout {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+  .review-experience .re-right {
+    grid-column: 1 / -1;
+    position: relative !important;
+    top: auto !important;
+  }
+}
+
+@media (max-width: 800px) {
+  .review-experience .re-layout {
+    grid-template-columns: 1fr;
+  }
+  .review-experience .re-left {
+    position: relative !important;
+    top: auto !important;
+  }
+}
+
+.review-experience .re-left,
+.review-experience .re-right {
+  position: sticky;
+  top: 16px;
+}
+
+.review-experience .re-bottom-bar {
+  position: sticky;
+  bottom: 12px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  background: var(--re-surface);
+  border: 1px solid var(--re-border);
+  border-radius: var(--re-radius);
+}
+
+@keyframes re-expand {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

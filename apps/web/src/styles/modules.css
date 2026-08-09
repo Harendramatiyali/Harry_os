@@ -1,0 +1,73 @@
+/* Module Design System — scoped under [data-module] */
+
+.module-surface {
+  color: var(--module-fg, inherit);
+}
+
+.module-surface .module-glow {
+  background: radial-gradient(
+    ellipse at top,
+    var(--module-glow, rgba(148, 163, 184, 0.12)),
+    transparent 65%
+  );
+}
+
+.module-surface .module-card {
+  border-color: var(--module-border, rgba(255, 255, 255, 0.08));
+  background: var(--module-card, hsl(var(--card) / 0.55));
+  border-radius: var(--module-radius, 1.5rem);
+}
+
+.module-surface .module-accent-text {
+  color: var(--module-accent);
+}
+
+.module-surface .module-progress-fill {
+  background: var(--module-progress);
+}
+
+.module-surface .module-display {
+  font-family: var(--module-font-display, var(--font-display), ui-serif, Georgia, serif);
+}
+
+.module-surface .module-mono {
+  font-family: var(--module-font-mono, ui-monospace, monospace);
+}
+
+/* Mood atmospheres */
+[data-mood="terminal"] .module-glow {
+  background: radial-gradient(ellipse at top, rgba(16, 185, 129, 0.16), transparent 60%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.2), transparent 40%);
+}
+
+[data-mood="reading"] .module-glow {
+  background: radial-gradient(ellipse at top, rgba(180, 120, 80, 0.2), transparent 62%),
+    linear-gradient(180deg, rgba(247, 241, 232, 0.35), transparent 50%);
+}
+
+[data-mood="workspace"] .module-glow {
+  background: radial-gradient(ellipse at top, rgba(59, 130, 246, 0.16), transparent 60%);
+}
+
+[data-mood="ledger"] .module-glow {
+  background: radial-gradient(ellipse at top, rgba(45, 212, 191, 0.14), transparent 60%);
+}
+
+[data-mood="wellness"] .module-glow {
+  background: radial-gradient(ellipse at top, rgba(14, 165, 233, 0.16), transparent 60%);
+}
+
+[data-mood="notes"] .module-glow {
+  background: radial-gradient(ellipse at top, rgba(23, 23, 23, 0.06), transparent 60%);
+}
+
+[data-module="books"] .module-paper-panel {
+  background: var(--module-paper);
+  border: 1px solid var(--module-border);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+}
+
+[data-module="trading"] .module-terminal-rail {
+  border-left: 2px solid var(--module-accent);
+  padding-left: 0.75rem;
+}
