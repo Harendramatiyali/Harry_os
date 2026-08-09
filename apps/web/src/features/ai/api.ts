@@ -1,4 +1,5 @@
 import { apiRequest } from "@/shared/api/client"
+import { API_BASE } from "@/shared/api/base"
 import type {
   AssignDestinationOut,
   AssignDestinationRequest,
@@ -110,7 +111,7 @@ export const aiApi = {
     for (const file of files) {
       form.append("files", file)
     }
-    const res = await fetch(`/api/v1/ai/imports/jobs/${jobId}/pages`, {
+    const res = await fetch(`${API_BASE}/ai/imports/jobs/${jobId}/pages`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
       credentials: "include",

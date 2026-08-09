@@ -5,6 +5,7 @@ import type {
   JournalDraft,
   JournalDraftTrade,
 } from "@/features/ai/importTypes"
+import { API_BASE } from "@/shared/api/base"
 
 function numOrEmpty(v: string | number | null | undefined): string {
   if (v === null || v === undefined || v === "") return ""
@@ -18,7 +19,7 @@ function parseOptionalNumber(v: string): string | null {
 }
 
 export function pageFileUrl(pageId: string, accessToken: string): string {
-  return `/api/v1/ai/imports/pages/${pageId}/file?access_token=${encodeURIComponent(accessToken)}`
+  return `${API_BASE}/ai/imports/pages/${pageId}/file?access_token=${encodeURIComponent(accessToken)}`
 }
 
 export function cloneImportReviewDraft(draft: ImportReviewDraft): ImportReviewDraft {

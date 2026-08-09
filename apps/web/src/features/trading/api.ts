@@ -1,4 +1,5 @@
 import { apiRequest } from "@/shared/api/client"
+import { API_BASE } from "@/shared/api/base"
 import type {
   JournalAnalytics,
   JournalDay,
@@ -100,7 +101,7 @@ export const tradingApi = {
     const form = new FormData()
     form.append("file", file)
     if (caption) form.append("caption", caption)
-    const res = await fetch(`/api/v1/trading/trades/${tradeId}/screenshots`, {
+    const res = await fetch(`${API_BASE}/trading/trades/${tradeId}/screenshots`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
       credentials: "include",
@@ -164,7 +165,7 @@ export const tradingApi = {
     if (opts?.journalTradeId) form.append("journal_trade_id", opts.journalTradeId)
 
     const doFetch = (accessToken: string) =>
-      fetch(`/api/v1/trading/journals/${journalId}/attachments`, {
+      fetch(`${API_BASE}/trading/journals/${journalId}/attachments`, {
         method: "POST",
         headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" },
         body: form,
@@ -246,7 +247,7 @@ export const tradingApi = {
 
   async fetchJournalAttachmentBlob(attachmentId: string, token: string) {
     const doFetch = (accessToken: string) =>
-      fetch(`/api/v1/trading/journals/attachments/${attachmentId}`, {
+      fetch(`${API_BASE}/trading/journals/attachments/${attachmentId}`, {
         headers: { Authorization: `Bearer ${accessToken}`, Accept: "*/*" },
         credentials: "include",
       })

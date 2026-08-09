@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: harry-os-api
+    runtime: docker
+    plan: free
+    rootDir: apps/api
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: APP_ENV
+        value: prod
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_NAME
+        value: Harry OS API
+      - key: API_PREFIX
+        value: /api/v1
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:///./data/harry_os.db
+      - key: MEDIA_ROOT
+        value: ./data/media
+      - key: LOG_JSON
+        value: "true"
+      - key: LOG_LEVEL
+        value: INFO
+      - key: AI_ENABLED
+        value: "false"
+      - key: CORS_ORIGINS
+        value: '["https://harry-os.vercel.app","http://localhost:5173"]'
+      - key: FRONTEND_URL
+        value: https://harry-os.vercel.app
+      - key: SECRET_KEY
+        generateValue: true

@@ -1,6 +1,5 @@
+import { API_BASE } from "@/shared/api/base"
 import { ApiError, type ApiErrorBody } from "@/shared/api/types"
-
-const API_BASE = "/api/v1"
 
 type RequestOptions = {
   method?: string

@@ -44,7 +44,8 @@ def _set_refresh_cookie(
         value=token,
         httponly=True,
         secure=settings.is_production,
-        samesite="lax",
+        # Cross-site (Vercel frontend → API host) requires SameSite=None + Secure.
+        samesite="none" if settings.is_production else "lax",
         max_age=max_age,
         path="/",
     )
@@ -54,7 +55,7 @@ def _clear_refresh_cookie(response: Response, settings: Settings) -> None:
     response.delete_cookie(
         key=settings.refresh_cookie_name,
         path="/",
-        samesite="lax",
+        samesite="none" if settings.is_production else "lax",
         secure=settings.is_production,
     )
 
