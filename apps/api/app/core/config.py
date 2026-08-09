@@ -1,10 +1,44 @@
 """Application settings loaded from environment variables."""
 
+from __future__ import annotations
+
 from functools import lru_cache
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
+
+
+def _empty_to_none(value: object) -> object:
+    if isinstance(value, str) and value.strip() == "":
+        return None
+    return value
+
+
+def _parse_str_list(value: object) -> object:
+    """Accept JSON arrays or comma-separated strings from host env UIs."""
+    if value is None:
+        return value
+    if isinstance(value, list):
+        return value
+    if not isinstance(value, str):
+        return value
+
+    raw = value.strip()
+    if not raw:
+        return []
+
+    if raw.startswith("["):
+        import json
+
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, list):
+                return [str(item).strip() for item in parsed if str(item).strip()]
+        except json.JSONDecodeError:
+            raw = raw.strip("[]")
+
+    return [part.strip().strip('"').strip("'") for part in raw.split(",") if part.strip()]
 
 
 class Settings(BaseSettings):
@@ -23,7 +57,10 @@ class Settings(BaseSettings):
     app_debug: bool = False
     app_version: str = "0.1.0"
     api_prefix: str = "/api/v1"
-    cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
+    # NoDecode: host env UIs often use comma lists; default JSON decode breaks those.
+    cors_origins: Annotated[list[str], NoDecode] = Field(
+        default_factory=lambda: ["http://localhost:5173"]
+    )
 
     # Security
     secret_key: str = "change-me"
@@ -47,14 +84,14 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     log_json: bool = True
 
-    # AI (architecture ready — logic not implemented)
+    # AI
     ai_enabled: bool = False
     llm_api_key: str | None = None
-    llm_base_url: str | None = None  # OpenAI-compatible base URL
+    llm_base_url: str | None = None
     llm_model: str = "gpt-4o-mini"
     embedding_model: str = "text-embedding-3-small"
     embedding_dimensions: int = 1536
-    ai_allowed_modules: list[str] = Field(
+    ai_allowed_modules: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: [
             "trading",
             "books",
@@ -71,17 +108,36 @@ class Settings(BaseSettings):
     # Obsidian import-only
     obsidian_vault_path: str | None = None
 
+    @field_validator("app_env", mode="before")
+    @classmethod
+    def normalize_app_env(cls, value: object) -> object:
+        if not isinstance(value, str):
+            return value
+        normalized = value.strip().lower()
+        aliases = {
+            "production": "prod",
+            "prod": "prod",
+            "local": "local",
+            "development": "local",
+            "dev": "local",
+            "docker": "docker",
+        }
+        return aliases.get(normalized, normalized)
+
     @field_validator("cors_origins", "ai_allowed_modules", mode="before")
     @classmethod
     def parse_list_fields(cls, value: object) -> object:
-        if isinstance(value, str):
-            raw = value.strip()
-            if raw.startswith("["):
-                import json
+        return _parse_str_list(value)
 
-                return json.loads(raw)
-            return [part.strip() for part in raw.split(",") if part.strip()]
-        return value
+    @field_validator(
+        "llm_api_key",
+        "llm_base_url",
+        "obsidian_vault_path",
+        mode="before",
+    )
+    @classmethod
+    def optional_str_fields(cls, value: object) -> object:
+        return _empty_to_none(value)
 
     @property
     def is_production(self) -> bool:
