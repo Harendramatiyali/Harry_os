@@ -10,8 +10,11 @@ export const authApi = {
     return apiRequest<TokenResponse>("/auth/login", { body: input })
   },
 
-  refresh() {
-    return apiRequest<TokenResponse>("/auth/refresh", { method: "POST" })
+  refresh(options?: { timeoutMs?: number }) {
+    return apiRequest<TokenResponse>("/auth/refresh", {
+      method: "POST",
+      timeoutMs: options?.timeoutMs,
+    })
   },
 
   logout() {

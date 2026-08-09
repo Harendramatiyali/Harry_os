@@ -24,8 +24,9 @@ function AuthBootstrap({ children }: { children: ReactNode }) {
 
   if (!bootstrapped) {
     return (
-      <div className="flex min-h-svh items-center justify-center text-sm text-muted-foreground">
-        Loading Harry OS…
+      <div className="flex min-h-svh flex-col items-center justify-center gap-2 px-6 text-center text-sm text-muted-foreground">
+        <p>Loading Harry OS…</p>
+        <p className="text-xs opacity-80">If this is the first visit, the API may take up to a minute to wake.</p>
       </div>
     )
   }

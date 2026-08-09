@@ -20,9 +20,9 @@ type AuthState = {
 }
 
 export const useAuthStore = create<AuthState>((set, get) => {
-  const refresh = async () => {
+  const refresh = async (timeoutMs?: number) => {
     try {
-      const data = await authApi.refresh()
+      const data = await authApi.refresh({ timeoutMs })
       set({
         accessToken: data.access_token,
         user: data.user,
@@ -35,7 +35,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
     }
   }
 
-  setRefreshHandler(refresh)
+  setRefreshHandler(() => refresh())
 
   return {
     user: null,
@@ -48,12 +48,16 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
     clearSession: () => set({ accessToken: null, user: null, isAuthenticated: false }),
 
-    refresh,
+    refresh: () => refresh(),
 
     bootstrap: async () => {
       if (get().bootstrapped) return
-      await refresh()
-      set({ bootstrapped: true })
+      try {
+        // Cap wait so Render cold starts don't freeze the shell forever.
+        await refresh(12_000)
+      } finally {
+        set({ bootstrapped: true })
+      }
     },
 
     login: async (email, password, rememberMe) => {
